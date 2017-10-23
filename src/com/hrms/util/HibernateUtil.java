@@ -7,7 +7,12 @@ package com.hrms.util;
 
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 /**
  * Hibernate Utility class with a convenient method to get Session Factory
@@ -15,9 +20,11 @@ import org.hibernate.SessionFactory;
  *
  * @author Masrat
  */
+@SuppressWarnings("deprecation")
 public class HibernateUtil {
 
     private static final SessionFactory sessionFactory;
+    private static ServiceRegistry serviceRegistry;
 
     public HibernateUtil() {
     }
@@ -26,14 +33,10 @@ public class HibernateUtil {
         try {
             // Create the SessionFactory from standard (hibernate.cfg.xml) 
             // config file.
-            ///sessionFactory = new Configuration().configure().buildSessionFactory();
-            
-            Configuration configuration = new Configuration().configure();
-            StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-            SessionFactory factory = configuration.buildSessionFactory(builder.build());
-            
-            
-            
+        	System.out.println("---------home----------------");    
+            sessionFactory = new Configuration().configure().buildSessionFactory();
+          
+    
             
         } catch (Throwable ex) {
             // Log the exception. 
@@ -45,4 +48,27 @@ public class HibernateUtil {
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
-}
+    
+    
+    public static final ThreadLocal session = new ThreadLocal();
+
+    public static Session currentSession() throws HibernateException {
+      Session s = (Session) session.get();
+      // Open a new Session, if this thread has none yet
+      if (s == null) {
+        s = sessionFactory.openSession();
+        // Store it in the ThreadLocal variable
+        session.set(s);
+      }
+      return s;
+    }
+
+    public static void closeSession() throws HibernateException {
+      Session s = (Session) session.get();
+      if (s != null)
+        s.close();
+      session.set(null);
+    }
+  }
+
+
