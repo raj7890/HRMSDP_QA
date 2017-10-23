@@ -37,7 +37,8 @@ public class UserManager {
 
     public UserManager() {
         System.out.println("---------home----------------");        
-        // this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+
     }
 
 
